@@ -17,7 +17,7 @@ echo "============================================"
 echo ""
 echo "=== Step 1/5: System packages ==="
 sudo apt-get update -qq
-sudo apt-get install -y -qq cmake build-essential git
+sudo apt-get install -y -qq cmake build-essential git python3-venv
 
 # 2. Python virtual environment + ML dependencies
 echo ""
