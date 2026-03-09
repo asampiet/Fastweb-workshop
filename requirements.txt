@@ -6,6 +6,7 @@ trl
 bitsandbytes
 datasets
 accelerate
+sentencepiece
 
 # MCP Server (C2)
 llama-cpp-python
