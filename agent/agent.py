@@ -25,15 +25,11 @@ class TelcoRCAAgent:
     def __init__(self):
         self.model = BedrockModel(model_id=MODEL_ID, region_name=AWS_REGION)
         self.mcp_client = MCPClient(lambda: sse_client(url=MCP_URL))
-        self.mcp_client.start()
-        tools = self.mcp_client.load_tools()
-        tool_names = [t.tool_name if hasattr(t, 'tool_name') else str(t) for t in tools]
-        logger.info(f"MCP tools discovered: {tool_names}")
 
         self.agent = Agent(
             model=self.model,
             system_prompt=SYSTEM_PROMPT,
-            tools=tools,
+            tools=[self.mcp_client],
         )
         model_prefix = MODEL_ID.split(":")[0] if ":" in MODEL_ID else MODEL_ID
         self.price_per_1k = TOKEN_PRICES.get(model_prefix, TOKEN_PRICES["default"])
