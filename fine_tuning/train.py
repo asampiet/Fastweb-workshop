@@ -69,7 +69,7 @@ def main():
         learning_rate=args.lr,
         lr_scheduler_type="cosine",
         warmup_steps=20,
-        bf16=True,
+        fp16=True,
         gradient_checkpointing=True,
         optim="paged_adamw_32bit",
         logging_steps=10,
