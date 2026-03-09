@@ -5,7 +5,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from agent import TelcoRCAAgent
-from config import API_PORT
+from config import API_PORT, MODEL_ID
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s] %(levelname)s %(message)s")
 logger = logging.getLogger("APIServer")
@@ -40,7 +40,7 @@ async def chat(req: ChatRequest):
 
 @app.get("/api/health")
 async def health():
-    return {"status": "healthy", "bedrock_model": agent.model.model_id}
+    return {"status": "healthy", "bedrock_model": MODEL_ID}
 
 
 if __name__ == "__main__":
