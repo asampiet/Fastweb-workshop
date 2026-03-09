@@ -1,0 +1,7 @@
+root         ::= object
+object       ::= "{" ws "\"events\"" ws ":" ws array ws "}"
+array        ::= "[" ws (event-obj (ws "," ws event-obj)*)? ws "]"
+event-obj    ::= "{" ws "\"error_code\"" ws ":" ws string ws "," ws "\"severity\"" ws ":" ws severity-val ws "}"
+string       ::= "\"" ([^"\\] | "\\" .)* "\""
+severity-val ::= "\"high\"" | "\"medium\"" | "\"low\""
+ws           ::= [ \t\n]*
