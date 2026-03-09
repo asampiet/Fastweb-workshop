@@ -1,7 +1,7 @@
 """T-301: Centralized configuration from environment variables."""
 import os
 
-MODEL_ID = os.getenv("BEDROCK_MODEL_ID", "anthropic.claude-4-5-haiku-latest-v1:0")
+MODEL_ID = os.getenv("BEDROCK_MODEL_ID", "global.anthropic.claude-haiku-4-5-20251001-v1:0")
 MCP_URL = os.getenv("MCP_SERVER_URL", "http://localhost:8000/sse")
 AWS_REGION = os.getenv("AWS_REGION", "us-east-1")
 API_PORT = int(os.getenv("API_PORT", "8080"))
