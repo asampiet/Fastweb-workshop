@@ -1,0 +1,24 @@
+# Fine-tuning (C1)
+torch>=2.0
+transformers>=4.40
+peft>=0.10
+trl
+bitsandbytes
+datasets
+accelerate
+
+# MCP Server (C2)
+llama-cpp-python
+mcp[cli]
+
+# Agent Backend (C3)
+fastapi
+uvicorn
+pydantic
+strands-agents
+strands-agents-tools
+boto3
+
+# Testing
+pytest
+requests
