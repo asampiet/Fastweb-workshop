@@ -1,0 +1,36 @@
+{
+  "transport_jitter": [
+    "2025-12-30T10:00:01Z [Heartbeat] Cell_ID_402 OK\n2025-12-30T10:00:02Z [RRC] RRC_CONNECTED state for IMSI 999123\n2025-12-30T10:00:03Z [NGAP] High TCP_Retransmission (15%) on N3_Interface_Link_44\n2025-12-30T10:00:04Z [Transport] Jitter detected: 45ms on backhaul link\n2025-12-30T10:00:05Z [Heartbeat] Cell_ID_402 OK\n2025-12-30T10:00:06Z [Transport] Packet loss 3.2% on N3_Interface_Link_44\n2025-12-30T10:00:07Z [QoS] GBR not guaranteed for bearer ID 5",
+    "2025-12-30T11:00:01Z [Heartbeat] Cell_ID_718 OK\n2025-12-30T11:00:02Z [Transport] TCP_Retransmission rate 12% on N3_Interface_Link_92\n2025-12-30T11:00:03Z [Transport] Jitter spike: 62ms on microwave backhaul\n2025-12-30T11:00:04Z [NGAP] Delayed NGAP response from AMF (timeout 3200ms)\n2025-12-30T11:00:05Z [Heartbeat] Cell_ID_718 OK",
+    "2025-12-30T12:00:01Z [Transport] Backhaul degradation detected on Link_55\n2025-12-30T12:00:02Z [Transport] TCP_Retransmission 18% sustained\n2025-12-30T12:00:03Z [Transport] Jitter 78ms exceeding threshold\n2025-12-30T12:00:04Z [Heartbeat] Cell_ID_301 OK\n2025-12-30T12:00:05Z [QoS] Video streaming QCI 7 degraded"
+  ],
+  "radio_failure": [
+    "2025-12-30T10:00:01Z [RRC] RRC_SETUP_FAILURE for IMSI 888456 on Cell_ID_6109\n2025-12-30T10:00:02Z [RRC] Signal strength: -103dBm (Poor)\n2025-12-30T10:00:03Z [RRC] RRC_REESTABLISHMENT_FAILURE for IMSI 888456\n2025-12-30T10:00:04Z [Heartbeat] Cell_ID_6109 OK\n2025-12-30T10:00:05Z [RRC] SINR: -2.1dB on Cell_ID_6109",
+    "2025-12-30T11:00:01Z [RRC] RRC_SETUP_FAILURE for IMSI 888789 on Cell_ID_4401\n2025-12-30T11:00:02Z [RRC] Signal strength: -108dBm (Very Poor)\n2025-12-30T11:00:03Z [RRC] Beam failure detected on SSB index 3\n2025-12-30T11:00:04Z [RRC] RRC_REESTABLISHMENT_FAILURE for IMSI 888789\n2025-12-30T11:00:05Z [Heartbeat] Cell_ID_4401 OK"
+  ],
+  "normal": [
+    "2025-12-30T10:00:01Z [Heartbeat] Cell_ID_9132 OK\n2025-12-30T10:00:02Z [RRC] RRC_CONNECTED state for IMSI 777789\n2025-12-30T10:00:03Z [AMF] Session established successfully\n2025-12-30T10:00:04Z [Heartbeat] Cell_ID_9132 OK\n2025-12-30T10:00:05Z [KeepAlive] UPF tunnel active",
+    "2025-12-30T11:00:01Z [Heartbeat] Cell_ID_2201 OK\n2025-12-30T11:00:02Z [KeepAlive] GTP-U tunnel stable\n2025-12-30T11:00:03Z [RRC] RRC_CONNECTED state for IMSI 777001\n2025-12-30T11:00:04Z [Heartbeat] Cell_ID_2201 OK\n2025-12-30T11:00:05Z [AMF] Registration complete",
+    "2025-12-30T12:00:01Z [Heartbeat] Cell_ID_5503 OK\n2025-12-30T12:00:02Z [Heartbeat] Cell_ID_5503 OK\n2025-12-30T12:00:03Z [KeepAlive] N3 interface stable\n2025-12-30T12:00:04Z [AMF] Periodic registration update OK"
+  ],
+  "authentication_failure": [
+    "2025-12-30T10:00:01Z [NAS] AUTHENTICATION_FAILURE for IMSI 666012 - MAC failure\n2025-12-30T10:00:02Z [NAS] REGISTRATION_REJECTED for IMSI 666012 - Cause: #3 Illegal UE\n2025-12-30T10:00:03Z [Heartbeat] Cell_ID_3301 OK\n2025-12-30T10:00:04Z [RRC] RRC_RELEASE for IMSI 666012",
+    "2025-12-30T11:00:01Z [NAS] AUTHENTICATION_FAILURE for IMSI 666345 - SQN sync failure\n2025-12-30T11:00:02Z [NAS] REGISTRATION_REJECTED for IMSI 666345 - Cause: #6 Illegal ME\n2025-12-30T11:00:03Z [AMF] Subscriber deregistered\n2025-12-30T11:00:04Z [Heartbeat] Cell_ID_7702 OK"
+  ],
+  "core_network_failure": [
+    "2025-12-30T10:00:01Z [NAS] 5GMM_CAUSE_NETWORK_FAILURE for IMSI 555901\n2025-12-30T10:00:02Z [NGAP] PDU_SESSION_FAILURE - SMF unreachable\n2025-12-30T10:00:03Z [RRC] RRC_SETUP_FAILURE for IMSI 555901 on Cell_ID_1102\n2025-12-30T10:00:04Z [Heartbeat] Cell_ID_1102 OK\n2025-12-30T10:00:05Z [NAS] 5GMM_CAUSE_CONGESTION reported on AMF-02",
+    "2025-12-30T11:00:01Z [NGAP] PDU_SESSION_FAILURE - UPF path error\n2025-12-30T11:00:02Z [NAS] 5GMM_CAUSE_NETWORK_FAILURE for IMSI 555222\n2025-12-30T11:00:03Z [RRC] RRC_REESTABLISHMENT_FAILURE for IMSI 555222\n2025-12-30T11:00:04Z [Heartbeat] Cell_ID_8803 OK"
+  ],
+  "handover_failure": [
+    "2025-12-30T10:00:01Z [RRC] HANDOVER_FAILURE for IMSI 444567 from Cell_ID_1001 to Cell_ID_1002\n2025-12-30T10:00:02Z [NGAP] HANDOVER_PREPARATION_FAILURE - Target cell overloaded\n2025-12-30T10:00:03Z [RRC] RRC_REESTABLISHMENT_FAILURE for IMSI 444567\n2025-12-30T10:00:04Z [Heartbeat] Cell_ID_1001 OK",
+    "2025-12-30T11:00:01Z [RRC] HANDOVER_FAILURE for IMSI 444890 from Cell_ID_3301 to Cell_ID_3302\n2025-12-30T11:00:02Z [NGAP] X2_HANDOVER_TIMEOUT on Xn interface\n2025-12-30T11:00:03Z [RRC] RRC_SETUP_FAILURE for IMSI 444890 on Cell_ID_3302\n2025-12-30T11:00:04Z [Heartbeat] Cell_ID_3301 OK"
+  ],
+  "congestion": [
+    "2025-12-30T10:00:01Z [NAS] 5GMM_CAUSE_CONGESTION for IMSI 333101 on AMF-01\n2025-12-30T10:00:02Z [NGAP] Overload indication from gNodeB Cell_ID_5501\n2025-12-30T10:00:03Z [RRC] RRC_SETUP_FAILURE for IMSI 333101 - Cell barred\n2025-12-30T10:00:04Z [NAS] 5GMM_CAUSE_CONGESTION for IMSI 333102 on AMF-01\n2025-12-30T10:00:05Z [Heartbeat] Cell_ID_5501 OK",
+    "2025-12-30T11:00:01Z [NAS] 5GMM_CAUSE_CONGESTION for IMSI 333201 on AMF-03\n2025-12-30T11:00:02Z [NGAP] Load report: Cell_ID_7701 at 98% capacity\n2025-12-30T11:00:03Z [RRC] Random access preamble collision rate 45%\n2025-12-30T11:00:04Z [Heartbeat] Cell_ID_7701 OK"
+  ],
+  "qos_violation": [
+    "2025-12-30T10:00:01Z [QoS] QOS_VIOLATION for bearer ID 7 - GBR 10Mbps not met (actual: 2.1Mbps)\n2025-12-30T10:00:02Z [QoS] QCI 1 (Voice) packet delay 180ms exceeding 100ms budget\n2025-12-30T10:00:03Z [Transport] Backhaul utilization 94% on Link_33\n2025-12-30T10:00:04Z [Heartbeat] Cell_ID_4401 OK",
+    "2025-12-30T11:00:01Z [QoS] QOS_VIOLATION for bearer ID 12 - MBR exceeded\n2025-12-30T11:00:02Z [QoS] QCI 7 (Video) jitter 55ms exceeding 30ms threshold\n2025-12-30T11:00:03Z [Heartbeat] Cell_ID_6602 OK\n2025-12-30T11:00:04Z [Transport] N3 interface congested"
+  ]
+}
