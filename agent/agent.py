@@ -5,6 +5,7 @@ import logging
 from strands import Agent
 from strands.models.bedrock import BedrockModel
 from strands.tools.mcp import MCPClient
+from mcp.client.sse import sse_client
 from config import MODEL_ID, MCP_URL, AWS_REGION, TOKEN_PRICES
 
 logger = logging.getLogger("TelcoAgent")
@@ -23,11 +24,7 @@ SYSTEM_PROMPT = (
 class TelcoRCAAgent:
     def __init__(self):
         self.model = BedrockModel(model_id=MODEL_ID, region_name=AWS_REGION)
-        self.mcp_client = MCPClient(lambda: StdioServerParameters(
-            command="", args=[]  # placeholder — overridden below
-        ))
-        # Use SSE transport for MCP
-        self.mcp_client = MCPClient(url=MCP_URL, transport="sse")
+        self.mcp_client = MCPClient(lambda: sse_client(url=MCP_URL))
         self.mcp_client.start()
         tools = self.mcp_client.list_tools()
         logger.info(f"MCP tools discovered: {[t.name for t in tools]}")
@@ -37,10 +34,9 @@ class TelcoRCAAgent:
             system_prompt=SYSTEM_PROMPT,
             tools=tools,
         )
-        # Resolve token price for cost estimation
         model_prefix = MODEL_ID.split(":")[0] if ":" in MODEL_ID else MODEL_ID
         self.price_per_1k = TOKEN_PRICES.get(model_prefix, TOKEN_PRICES["default"])
-        logger.info(f"Agent ready: model={MODEL_ID}, price=${self.price_per_1k}/1K tokens")
+        logger.info(f"Agent ready: model={MODEL_ID}")
 
     def process_query(self, message: str) -> dict:
         start = time.time()
@@ -52,7 +48,8 @@ class TelcoRCAAgent:
     def _extract_metrics(self, response, total_time: float) -> dict | None:
         try:
             for result in getattr(response, "tool_results", []):
-                data = json.loads(result.content if hasattr(result, "content") else str(result))
+                content = result.content if hasattr(result, "content") else str(result)
+                data = json.loads(content)
                 if "metadata" in data:
                     m = data["metadata"]
                     raw_tok = m["raw_log_bytes"] // 4
