@@ -26,8 +26,9 @@ class TelcoRCAAgent:
         self.model = BedrockModel(model_id=MODEL_ID, region_name=AWS_REGION)
         self.mcp_client = MCPClient(lambda: sse_client(url=MCP_URL))
         self.mcp_client.start()
-        tools = self.mcp_client.list_tools()
-        logger.info(f"MCP tools discovered: {[t.name for t in tools]}")
+        tools = self.mcp_client.load_tools()
+        tool_names = [t.tool_name if hasattr(t, 'tool_name') else str(t) for t in tools]
+        logger.info(f"MCP tools discovered: {tool_names}")
 
         self.agent = Agent(
             model=self.model,
