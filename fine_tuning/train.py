@@ -1,23 +1,22 @@
 #!/usr/bin/env python3
-"""T-101: QLoRA fine-tuning of Qwen3-14B for 3GPP Root Cause Analysis."""
+"""T-101: QLoRA fine-tuning of Qwen3-14B for 3GPP Root Cause Analysis.
+Based on proven configuration from production training runs."""
 import argparse
-import json
 import torch
 from datasets import load_dataset
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
-from peft import LoraConfig, get_peft_model
-from trl import SFTTrainer, SFTConfig
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, TrainingArguments
+from peft import LoraConfig, TaskType, prepare_model_for_kbit_training
+from trl import SFTTrainer
 
 def parse_args():
     p = argparse.ArgumentParser(description="Fine-tune Qwen3-14B with QLoRA")
     p.add_argument("--dataset", default="data/training_data.json")
     p.add_argument("--base-model", default="models/Qwen3-14B")
-    p.add_argument("--output-dir", default="output")
+    p.add_argument("--output-dir", default="output/adapter")
     p.add_argument("--rank", type=int, default=16)
     p.add_argument("--alpha", type=int, default=32)
-    p.add_argument("--epochs", type=float, default=1.0)
+    p.add_argument("--max-steps", type=int, default=325)
     p.add_argument("--lr", type=float, default=1e-4)
-    p.add_argument("--max-seq-length", type=int, default=2048)
     return p.parse_args()
 
 def main():
@@ -27,7 +26,6 @@ def main():
     print(f"Loading dataset: {args.dataset}")
     dataset = load_dataset("json", data_files=args.dataset, split="train")
     assert len(dataset) == 1300, f"Expected 1300 examples, got {len(dataset)}"
-    assert "text" in dataset.column_names, f"Expected 'text' column, got {dataset.column_names}"
     print(f"Dataset: {len(dataset)} examples ✓")
 
     # 2. Load base model in 4-bit NF4
@@ -42,57 +40,57 @@ def main():
         args.base_model,
         quantization_config=bnb_config,
         device_map="auto",
+        torch_dtype=torch.float16,
     )
-    tokenizer = AutoTokenizer.from_pretrained(args.base_model)
-    if tokenizer.pad_token is None:
-        tokenizer.pad_token = tokenizer.eos_token
-    print(f"Model loaded on {model.device} ✓")
 
-    # 3. Attach QLoRA adapters
-    lora_config = LoraConfig(
+    # Critical: prepare model for k-bit training before attaching LoRA
+    model.gradient_checkpointing_enable()
+    model = prepare_model_for_kbit_training(model)
+    print(f"Model loaded and prepared for k-bit training ✓")
+
+    # 3. Configure QLoRA adapters (passed to SFTTrainer, not applied manually)
+    tokenizer = AutoTokenizer.from_pretrained(args.base_model)
+    tokenizer.pad_token = tokenizer.eos_token
+
+    peft_config = LoraConfig(
         r=args.rank,
         lora_alpha=args.alpha,
         lora_dropout=0.1,
         target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
-        task_type="CAUSAL_LM",
+        task_type=TaskType.CAUSAL_LM,
     )
-    model = get_peft_model(model, lora_config)
-    trainable, total = model.get_nb_trainable_parameters()
-    print(f"LoRA attached: {trainable:,} trainable / {total:,} total ({100*trainable/total:.2f}%) ✓")
 
     # 4. Train
-    training_args = SFTConfig(
-        output_dir=f"{args.output_dir}/checkpoints",
-        num_train_epochs=args.epochs,
-        per_device_train_batch_size=1,
-        gradient_accumulation_steps=4,
-        learning_rate=args.lr,
-        lr_scheduler_type="cosine",
-        warmup_steps=20,
-        fp16=True,
-        gradient_checkpointing=True,
-        optim="paged_adamw_32bit",
-        logging_steps=10,
-        save_strategy="no",
-        max_grad_norm=0.3,
-        report_to="none",
-        max_length=args.max_seq_length,
-    )
+    print(f"Training: {args.max_steps} steps, lr={args.lr}, rank={args.rank}, alpha={args.alpha}")
     trainer = SFTTrainer(
         model=model,
         train_dataset=dataset,
-        args=training_args,
+        peft_config=peft_config,
         processing_class=tokenizer,
+        args=TrainingArguments(
+            output_dir=args.output_dir,
+            per_device_train_batch_size=1,
+            gradient_accumulation_steps=4,
+            max_steps=args.max_steps,
+            learning_rate=args.lr,
+            fp16=True,
+            logging_steps=10,
+            save_strategy="no",
+            gradient_checkpointing=True,
+            optim="paged_adamw_32bit",
+            warmup_steps=20,
+            max_grad_norm=0.3,
+            report_to="none",
+        ),
+        formatting_func=lambda x: x["text"],
     )
 
-    print(f"Training: {args.epochs} epoch(s), lr={args.lr}, rank={args.rank}, alpha={args.alpha}")
     trainer.train()
 
     # 5. Save adapter
-    adapter_path = f"{args.output_dir}/adapter"
-    model.save_pretrained(adapter_path)
-    tokenizer.save_pretrained(adapter_path)
-    print(f"Adapter saved to {adapter_path} ✓")
+    trainer.save_model(args.output_dir)
+    tokenizer.save_pretrained(args.output_dir)
+    print(f"Adapter saved to {args.output_dir} ✓")
 
     # Summary
     logs = trainer.state.log_history
@@ -102,7 +100,6 @@ def main():
         print(f"  Initial loss: {losses[0]:.3f}")
         print(f"  Final loss:   {losses[-1]:.3f}")
         print(f"  Steps:        {trainer.state.global_step}")
-        print(f"  Duration:     {trainer.state.log_history[-1].get('train_runtime', 0):.0f}s")
 
 if __name__ == "__main__":
     main()
