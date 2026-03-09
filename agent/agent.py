@@ -44,23 +44,29 @@ class TelcoRCAAgent:
 
     def _extract_metrics(self, response, total_time: float) -> dict | None:
         try:
-            for result in getattr(response, "tool_results", []):
-                content = result.content if hasattr(result, "content") else str(result)
-                data = json.loads(content)
-                if "metadata" in data:
-                    m = data["metadata"]
-                    raw_tok = m["raw_log_bytes"] // 4
-                    filt_tok = m["filtered_output_bytes"] // 4
-                    return {
-                        "raw_log_bytes": m["raw_log_bytes"],
-                        "raw_log_tokens_est": raw_tok,
-                        "filtered_output_bytes": m["filtered_output_bytes"],
-                        "filtered_output_tokens_est": filt_tok,
-                        "token_reduction_pct": round((1 - filt_tok / max(raw_tok, 1)) * 100, 1),
-                        "estimated_cost_savings_usd": round((raw_tok - filt_tok) / 1000 * self.price_per_1k, 4),
-                        "slm_inference_latency_sec": m["inference_latency_sec"],
-                        "total_response_time_sec": total_time,
-                    }
+            # Tool results are in agent.messages as toolResult entries
+            for msg in self.agent.messages:
+                content = msg.get("content", [])
+                if not isinstance(content, list):
+                    continue
+                for c in content:
+                    if isinstance(c, dict) and "toolResult" in c:
+                        for text_block in c["toolResult"].get("content", []):
+                            data = json.loads(text_block.get("text", "{}"))
+                            if "metadata" in data:
+                                m = data["metadata"]
+                                raw_tok = m["raw_log_bytes"] // 4
+                                filt_tok = m["filtered_output_bytes"] // 4
+                                return {
+                                    "raw_log_bytes": m["raw_log_bytes"],
+                                    "raw_log_tokens_est": raw_tok,
+                                    "filtered_output_bytes": m["filtered_output_bytes"],
+                                    "filtered_output_tokens_est": filt_tok,
+                                    "token_reduction_pct": round((1 - filt_tok / max(raw_tok, 1)) * 100, 1),
+                                    "estimated_cost_savings_usd": round((raw_tok - filt_tok) / 1000 * self.price_per_1k, 4),
+                                    "slm_inference_latency_sec": m["inference_latency_sec"],
+                                    "total_response_time_sec": total_time,
+                                }
         except Exception as e:
             logger.debug(f"Metrics extraction failed: {e}")
         return None
