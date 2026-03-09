@@ -64,8 +64,14 @@ def main():
     latencies = []
 
     for i, example in enumerate(test_data):
-        raw_logs = extract_user_text(example["text"])
-        expected = parse_ground_truth(extract_assistant_text(example["text"]))
+        # Support both formats: {"text": "<ChatML>"} and {"logs": "...", "ground_truth": {...}}
+        if "text" in example:
+            raw_logs = extract_user_text(example["text"])
+            expected = parse_ground_truth(extract_assistant_text(example["text"]))
+        else:
+            raw_logs = example["logs"]
+            gt = example.get("ground_truth", {})
+            expected = {e["error_code"] for e in gt.get("events", [])}
 
         result = engine.analyze(raw_logs)
         events = result["events"]
@@ -73,6 +79,7 @@ def main():
             events, _ = apply_filter(events)
 
         predicted = {e["error_code"] for e in events}
+
         tp = len(predicted & expected)
         fp = len(predicted - expected)
         fn = len(expected - predicted)
@@ -84,7 +91,7 @@ def main():
             totals["exact"] += 1
         latencies.append(result["inference_latency_sec"])
 
-        scenario = example.get("scenario", "unknown")
+        scenario = example.get("scenario_type", example.get("scenario", "unknown"))
         per_scenario[scenario]["tp"] += tp
         per_scenario[scenario]["fp"] += fp
         per_scenario[scenario]["fn"] += fn
