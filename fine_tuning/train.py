@@ -4,9 +4,9 @@ import argparse
 import json
 import torch
 from datasets import load_dataset
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, TrainingArguments
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from peft import LoraConfig, get_peft_model
-from trl import SFTTrainer
+from trl import SFTTrainer, SFTConfig
 
 def parse_args():
     p = argparse.ArgumentParser(description="Fine-tune Qwen3-14B with QLoRA")
@@ -61,7 +61,7 @@ def main():
     print(f"LoRA attached: {trainable:,} trainable / {total:,} total ({100*trainable/total:.2f}%) ✓")
 
     # 4. Train
-    training_args = TrainingArguments(
+    training_args = SFTConfig(
         output_dir=f"{args.output_dir}/checkpoints",
         num_train_epochs=args.epochs,
         per_device_train_batch_size=1,
@@ -76,13 +76,13 @@ def main():
         save_strategy="no",
         max_grad_norm=0.3,
         report_to="none",
+        max_length=args.max_seq_length,
     )
     trainer = SFTTrainer(
         model=model,
         train_dataset=dataset,
         args=training_args,
         processing_class=tokenizer,
-        max_seq_length=args.max_seq_length,
     )
 
     print(f"Training: {args.epochs} epoch(s), lr={args.lr}, rank={args.rank}, alpha={args.alpha}")
