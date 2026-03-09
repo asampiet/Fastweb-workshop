@@ -309,3 +309,67 @@ T-202 ──────────────┘  │                        
 ---
 
 *End of Implementation Task List*
+
+
+---
+
+## Phase 6: EC2 Deployment & End-to-End Validation
+
+### T-601: Launch EC2 g6.12xlarge instance
+- **Action:** Launch g6.12xlarge in us-west-2 with Deep Learning Base AMI (Ubuntu 22.04), 250 GB gp3 EBS, security group allowing SSH + ports 3000/8000/8080
+- **Acceptance:** Instance running, SSH accessible
+- **Estimate:** 10 min
+
+### T-602: Clone repo and run setup_instance.sh
+- **Action:** Clone workshop repo, run `scripts/setup_instance.sh`, verify GPU detection (4x L4), all packages installed
+- **Acceptance:** `nvidia-smi` shows 4 GPUs, Python venv active, llama.cpp quantize binary built
+- **Estimate:** 20 min
+
+### T-603: Download Qwen3-14B base model
+- **Action:** Run `scripts/download_model.sh`, verify tokenizer loads
+- **Acceptance:** `models/Qwen3-14B/config.json` exists, ~28 GB downloaded
+- **Estimate:** 15 min
+
+### T-604: Run fine-tuning (train.py)
+- **Action:** `python fine_tuning/train.py`, monitor loss convergence
+- **Acceptance:** Final loss < 0.30, adapter saved to `output/adapter/`, training ~31 min
+- **Estimate:** 35 min
+
+### T-605: Merge adapter and convert to GGUF
+- **Action:** Run `python fine_tuning/merge_adapter.py` then `bash fine_tuning/convert_to_gguf.sh`
+- **Acceptance:** `output/qwen3-14b-telco-Q4_K_M.gguf` exists, ~9 GB
+- **Estimate:** 25 min
+
+### T-606: Run model validation (validate.py)
+- **Action:** `python fine_tuning/validate.py --model-path $(pwd)/output/qwen3-14b-telco-Q4_K_M.gguf --with-filter`
+- **Acceptance:** F1 ≥ 0.90 (with filter), per-scenario breakdown printed, avg latency < 10s
+- **Estimate:** 90 min (1000 examples × ~6s each)
+
+### T-607: Start all services and run e2e demo
+- **Action:** Run `scripts/run_all.sh`, open GUI in browser, execute all 4 demo scenarios, verify comparison panel metrics
+- **Acceptance:** All 4 demos produce correct diagnosis, token reduction ≥ 90%, no errors
+- **Estimate:** 15 min
+
+### T-608: Run full test suite on EC2
+- **Action:** `python -m pytest tests/ -v` (all tests including e2e)
+- **Acceptance:** All tests pass
+- **Estimate:** 10 min
+
+### T-609: Terminate EC2 instance
+- **Action:** Stop and terminate instance, delete EBS volume
+- **Acceptance:** No running resources, cost confirmed
+- **Estimate:** 5 min
+
+---
+
+## Updated Summary
+
+| Phase | Tasks | Estimated Time |
+|-------|-------|---------------|
+| Phase 0: Scaffolding | T-001 to T-004 | 1h 5min |
+| Phase 1: Fine-Tuning | T-101 to T-104, T-401 | 2h 45min |
+| Phase 2: MCP Server | T-201 to T-206, T-402, T-403 | 3h 5min |
+| Phase 3: Web GUI | T-301 to T-310, T-404 | 3h 55min |
+| Phase 5: Integration | T-405, T-501, T-502 | 1h 15min |
+| Phase 6: EC2 Validation | T-601 to T-609 | 3h 45min |
+| **Total** | **40 tasks** | **~15h 50min** |
